@@ -65,6 +65,15 @@ Paragraphs can contain italicized words, notated in the .bmd file as:
 
     Here comes an italicized *word*, isn't it cool?
 
+Paragraphs can also contain links in reference-at-the-bottom mode,
+which look like this:
+
+    Here is a [link][x] in a sentence.
+
+Then later:
+
+    [x]: http://www.google.com
+
 Paragraphs can contain lists, or lists can stand alone.  Lists can be
 bulleted or numbered, with the items separated by a blank newline or
 not.  This is a list:
@@ -102,11 +111,8 @@ separated by a blank newline.
 
 ### Bugs and Next Steps
 
-The source .bmd file must end with a paragraph.  Ending with a list
-breaks things.
-
-There isn't any support for links yet.  I'm not sure how I haven't
-needed them yet.
+The source .bmd file must end with a paragraph or a link reference.
+Ending with a list breaks things.
 
 Written by: Dan Williams <danlythemanly@gmail.com> 7/26/2014
 

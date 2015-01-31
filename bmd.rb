@@ -1,4 +1,5 @@
 filename = ARGV[0]
+$links = Array.new
 
 class Image
   def initialize(filename)
@@ -31,6 +32,13 @@ class Paragraph
   end
 
   def emit
+    linked = @text[/\[([^\]]*)\]\[([^\]]*)\]/, 1]
+    hrefid = @text[/\[([^\]]*)\]\[([^\]]*)\]/, 2]
+
+    unless linked.nil? || hrefid.nil?
+      href = $links.select { |x| x.match(hrefid) }[0].url
+      @text = @text.gsub(/\[([^\]]*)\]\[([^\]]*)\]/, "<a href=#{href}>#{linked}</a>")
+    end
     "<p>" + @text.gsub(/\*([^\*]*)\*/, '<i>\1</i>') + "</p>"
   end
 end
@@ -73,6 +81,19 @@ class Subsection
     str += "<h3><a id=\"#{self.object_id}\">#{@title}</a></h3>"
     @content.each { |c| str += c.emit }
     str += '</div>'
+  end
+end
+
+class Link
+  attr_reader :url
+
+  def initialize(str)
+    @id = str[/^\[(.*)\]: /, 1]
+    @url = str.gsub(/^\[.*\]: /, '')
+  end
+
+  def match(id)
+    @id == id
   end
 end
 
@@ -164,6 +185,9 @@ File.readlines(filename).each do |line|
 
   elsif line.match(/^#asciiimg.*/) # image
     cursub.addcontent(AsciiImage.new(line.gsub(/^\#asciiimg /,'')))
+
+  elsif line.match(/^\[.*\]: /) # link ref
+    $links.push(Link.new(line.chomp))
 
   elsif line.chomp == '' # a blank line
 

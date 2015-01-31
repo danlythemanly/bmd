@@ -23,7 +23,7 @@ Here comes an italicized *word*, isn't it cool?
 Images
 ------
 
-I found this cat image on Wikipedia, and I'm pretty sure that most
+I found this cat image on [Wikipedia][1], and I'm pretty sure that most
 blogs put up pictures of cats, so here you go:
 
 #img cat.jpg
@@ -48,6 +48,4 @@ Sometimes you don't want numbers
 
 That's all!
 
-
-
-
+[1]: http://www.wikipedia.org
