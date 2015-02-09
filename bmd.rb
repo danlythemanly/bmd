@@ -32,13 +32,17 @@ class Paragraph
   end
 
   def emit
-    linked = @text[/\[([^\]]*)\]\[([^\]]*)\]/, 1]
-    hrefid = @text[/\[([^\]]*)\]\[([^\]]*)\]/, 2]
 
-    unless linked.nil? || hrefid.nil?
+    loop do
+      linked = @text[/\[([^\]]*)\]\[([^\]]*)\]/, 1]
+      hrefid = @text[/\[([^\]]*)\]\[([^\]]*)\]/, 2]
+
+      break if linked.nil? || hrefid.nil?
+
       href = $links.select { |x| x.match(hrefid) }[0].url
-      @text = @text.gsub(/\[([^\]]*)\]\[([^\]]*)\]/, "<a href=#{href}>#{linked}</a>")
+      @text = @text.sub(/\[([^\]]*)\]\[([^\]]*)\]/, "<a href=#{href}>#{linked}</a>")
     end
+
     "<p>" + @text.gsub(/\*([^\*]*)\*/, '<i>\1</i>') + "</p>"
   end
 end
