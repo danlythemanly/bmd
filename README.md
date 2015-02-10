@@ -14,11 +14,13 @@ markdown-like version and the html version are pretty similar.
 - only 3 layers of headings: title, section, subsection
 - tables of contents (1 for all sections, one per section containing
   subsections)
+- publication links
 
 ### BMD features
 - markup-free headings, paragraphs, lists, italics
 - no need to worry about padding
 - no need to worry about tables of contents
+- no need to worry about fixing up publication indexes
 
 ### Running it
 
@@ -73,6 +75,24 @@ which look like this:
 Then later:
 
     [x]: http://www.google.com
+
+There is also a special type of link, which is a link to a publication
+bibliography entry.  A publication bibliography entry is specified
+like this:
+
+    [[foo]]: http://url.of.publication.pdf
+      Bibliography Entry with authors, [title], venue year, etc.
+
+This entry will appear at the end of the HTML, in an ordered list.
+The part of the entry in single brackets (e.g., title in this case)
+will link to the appropriate URL.  Elsewhere in the paragraph, links
+to the entry look like this:
+
+    I wrote a paper[[foo]] that is really great!
+
+These references will be replaced with a hyperlink to the bibliography
+entry (via an anchor) and the correct index into the ordered list
+between single brackets.
 
 Paragraphs can contain lists, or lists can stand alone.  Lists can be
 bulleted or numbered, with the items separated by a blank newline or

@@ -1,5 +1,6 @@
 filename = ARGV[0]
 $links = Array.new
+$pubs = Array.new
 
 class Image
   def initialize(filename)
@@ -33,6 +34,7 @@ class Paragraph
 
   def emit
 
+    # look for links 
     loop do
       linked = @text[/\[([^\]]*)\]\[([^\]]*)\]/, 1]
       hrefid = @text[/\[([^\]]*)\]\[([^\]]*)\]/, 2]
@@ -41,6 +43,18 @@ class Paragraph
 
       href = $links.select { |x| x.match(hrefid) }[0].url
       @text = @text.sub(/\[([^\]]*)\]\[([^\]]*)\]/, "<a href=#{href}>#{linked}</a>")
+    end
+
+    # look for pubs
+    loop do 
+      id = @text[/\[\[([^\]]*)\]\]/, 1]
+      break if id.nil?
+
+      p = $pubs.select { |x| x.match(id) }[0]
+      break if p.nil?
+      
+      @text = @text.sub(/\[\[([^\]]*)\]\]/, 
+                        "[<a href=\"\##{p.object_id}\">#{p.num}</a>]")   
     end
 
     "<p>" + @text.gsub(/\*([^\*]*)\*/, '<i>\1</i>') + "</p>"
@@ -85,6 +99,37 @@ class Subsection
     str += "<h3><a id=\"#{self.object_id}\">#{@title}</a></h3>"
     @content.each { |c| str += c.emit }
     str += '</div>'
+  end
+end
+
+class Publication
+  attr_reader :num
+  @@numpubs = 0
+
+  def initialize(str)
+    @id = str[/^\[\[(.*)\]\]: /, 1]
+    @url = str.gsub(/^\[\[.*\]\]: /, '')
+    @text = ""
+    @@numpubs += 1
+    @num = @@numpubs
+  end
+
+  def addline(line)
+    @text += line
+  end
+
+  def match(id)
+    @id == id
+  end
+
+  def emit
+    linked = @text[/\[([^\]]*)\]/, 1]
+    unless linked.nil?
+      @text = @text.sub(/\[([^\]]*)\]/, "<a href=#{@url}>#{linked}</a>")
+    end
+    str = "<li><p><a id=\"#{self.object_id}\">"
+    str += @text + "</a></p></li>"
+    str
   end
 end
 
@@ -135,8 +180,8 @@ end
 sections = []
 
 prevline = ''
-cursub = cursec = curp = curl = nil
-inpara = inlist = false
+cursub = cursec = curp = curl = curpub = nil
+inpara = inlist = inpub = false
 titlelines = []
 
 File.readlines(filename).each do |line|
@@ -190,6 +235,11 @@ File.readlines(filename).each do |line|
   elsif line.match(/^#asciiimg.*/) # image
     cursub.addcontent(AsciiImage.new(line.gsub(/^\#asciiimg /,'')))
 
+  elsif line.match(/^\[\[.*\]\]: /) # publication link
+    curpub = Publication.new(line.chomp)
+    inpub = true
+    $pubs.push(curpub)
+    
   elsif line.match(/^\[.*\]: /) # link ref
     $links.push(Link.new(line.chomp))
 
@@ -202,25 +252,32 @@ File.readlines(filename).each do |line|
 
     # could be still working on list, but definitely done with para
     inpara = false
-
+    inpub = false
   else # random line with text
 
     # if we haven't started sections yet, it's the title
     titlelines.push line if cursub.nil?
 
-    # must have had blank line (!inpara) and didn't match number, so
-    # we're done with the list now
-    if inlist && !inpara
-      inlist = false 
-      cursub.addcontent curl
+    # we might be in a publication
+    if inpub
+      curpub.addline(line)
+
+    else
+      
+      # must have had blank line (!inpara) and didn't match number, so
+      # we're done with the list now
+      if inlist && !inpara
+        inlist = false 
+        cursub.addcontent curl
+      end
+      
+      # start new para (if we aren't in the middle of one)
+      curp = Paragraph.new unless inpara
+      
+      # start adding to our para
+      curp.addline(line)
+      inpara = true
     end
-
-    # start new para (if we aren't in the middle of one)
-    curp = Paragraph.new unless inpara
-
-    # start adding to our para
-    curp.addline(line)
-    inpara = true
   end
 
   prevline = line
@@ -275,6 +332,10 @@ end
 html += '</ol></div>'
 
 sections.each { |s| html += s.emit }
+
+html += '<div class="pubs"><ol>'
+$pubs.each { |p| html += p.emit }
+html += '</ol></div>'
 
 html += '</div>'
 html += ''
