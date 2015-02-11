@@ -39,24 +39,28 @@ example:
                              |___/ 
 
 
-Then there are sections headings, which are notated in the .bmd file
-like this:
-
-    ===== A Section =====
-
 At the top of the blog, a table of contents will be generated
 containing all sections.  The .bmd file doesn't have a table of
 contents, though, and when writing blog entries, you don't need to
-worry about them.  Sections may include subsections.  Subsection
-headings are notated in the .bmd file like this:
+worry about them.  Sections headings are notated in the .bmd file like
+this:
+
+    ===== A Section =====
+
+Sections may include subsections.  The generated HTML will similarly
+have a table of contents at the top of each section listing these
+subsections.  Again, the table of contents doesn't show up in the .bmd
+file at all.  If the table of contents for a section is not desired,
+the section heading can be notated like this:
+
+    ===== A Section =====|
+
+Subsection headings are notated in the .bmd file like this:
 
     Subsection
     ----------
 
-The generated HTML will similarly have a table of contents at the top
-of each section listing subsections.  Again, the table of contents
-doesn't show up in the .bmd file at all.  Sections and subsections can
-both have paragraphs inside them:
+Sections and subsections can both have paragraphs inside them:
 
     This is a paragraph.  For me, the lines are normally chopped in
     emacs because I like it that way.  Paragraphs have no indent or
