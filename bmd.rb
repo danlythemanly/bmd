@@ -149,7 +149,8 @@ end
 class Section 
   attr_reader :title, :subsections, :leadin
 
-  def initialize(str)
+  def initialize(str, toc)
+    @toc = toc
     @title = str.gsub(/^===== /, '').gsub(/ =====$/, '')
     @leadin = Subsection.new
     @subsections = Array.new
@@ -164,12 +165,14 @@ class Section
     str += '<div class="section">'
     str += "<h2><a id=\"#{self.object_id}\">#{@title}</a></h2>"
 
-    str += '<div class="toc"><ol>'
-    @subsections.each do |s| 
-      str += "<li><a href=\"\##{s.object_id}\">"
-      str += "#{s.title}</a></li>"
+    if @toc
+      str += '<div class="toc"><ol>'
+      @subsections.each do |s| 
+        str += "<li><a href=\"\##{s.object_id}\">"
+        str += "#{s.title}</a></li>"
+      end
+      str += '</ol></div>'
     end
-    str += '</ol></div>'
 
     str += @leadin.emit
     @subsections.each { |s| str += s.emit }
@@ -186,8 +189,16 @@ titlelines = []
 
 File.readlines(filename).each do |line|
 
-  if line.match(/^=====.*=====$/) # section header
-    cursec = Section.new(line)
+  if line.match(/^=====.*=====\|$/) # section header with no toc
+    cursec = Section.new(line.sub(/\|$/, ''), false)
+    
+    # first subsection is the leadin
+    cursub = cursec.leadin
+
+    sections.push cursec
+
+  elsif line.match(/^=====.*=====$/) # section header with toc
+    cursec = Section.new(line, true)
     
     # first subsection is the leadin
     cursub = cursec.leadin
