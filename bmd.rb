@@ -205,7 +205,7 @@ File.readlines(filename).each do |line|
 
     sections.push cursec
 
-  elsif line.match(/---*/) # subsection underscore
+  elsif line.match(/^---*$/) # subsection underscore
 
     # previous line had title of subsec
     cursub = Subsection.new(prevline)
